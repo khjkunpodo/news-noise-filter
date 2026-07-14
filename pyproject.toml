@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "news-noise-filter"
+version = "0.1.0"
+description = "A three-stage (regex -> dedup -> LLM judge) filter that turns a raw news-headline firehose into the few worth reading."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# Only needed to enable the stage-3 LLM judge; the pipeline fails open without it.
+llm = ["anthropic>=0.40"]
+test = ["pytest"]
+
+[tool.setuptools]
+packages = ["noise_filter"]

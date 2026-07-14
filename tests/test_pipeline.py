@@ -71,6 +71,51 @@ def test_pipeline_counts_monotonic():
     assert c["kept"] > 0  # signal survives
 
 
+def test_empty_input_returns_empty_with_zeroed_counts():
+    # No headlines in, nothing out — and every per-stage count is zero, not
+    # missing, so downstream reporting never trips over a KeyError.
+    result = run(CFG, [], use_llm=False)
+    assert result.kept == []
+    assert result.counts == {
+        "raw": 0,
+        "after_rules": 0,
+        "after_dedup": 0,
+        "kept": 0,
+    }
+
+
+def test_empty_pattern_groups_treat_nothing_as_noise():
+    # A config whose pattern groups are all empty must compile cleanly (the
+    # "(?!)" match-nothing sentinel) and classify everything as signal — no
+    # false drops, no crash.
+    cfg = {
+        "priority_entities": [],
+        "noise_patterns": [],
+        "market_patterns": [],
+        "earnings_patterns": [],
+        "analyst_patterns": [],
+        "aliases": {},
+        "sim_threshold": 0.55,
+    }
+    rules = Rules.from_config(cfg)
+    assert rules.is_noise("Globex donates $2M and wins an industry award") is False
+    assert rules.must_keep("Acme reports record Q3 earnings") is False
+    result = run(cfg, ["Globex donates $2M", "Acme shares rose 3% intraday"], use_llm=False)
+    assert result.counts["after_rules"] == result.counts["raw"] == 2
+
+
+def test_alias_normalization_merges_near_duplicates_during_dedup():
+    # Two headlines that differ only by an aliased token ("Acme Corporation"
+    # vs "Acme") must collapse to one — the alias is normalized before the
+    # bigram-Jaccard comparison. Without the alias the extra tokens push them
+    # below threshold, so this proves normalization is what merges them.
+    from noise_filter.dedup import dedup
+
+    titles = ["Acme Corporation Q3 update", "Acme Q3 update"]
+    assert len(dedup(titles, threshold=0.55, aliases=CFG["aliases"])) == 1
+    assert len(dedup(titles, threshold=0.55, aliases={})) == 2
+
+
 def json_sample():
     import json
 

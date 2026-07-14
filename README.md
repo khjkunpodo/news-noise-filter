@@ -1,5 +1,8 @@
 # news-noise-filter
 
+[![CI](https://github.com/khjkunpodo/news-noise-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/khjkunpodo/news-noise-filter/actions/workflows/ci.yml)
+[![python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)](https://www.python.org/)
+
 A three-stage filter that turns a raw firehose of news headlines into the
 handful a professional actually needs to read — cheaply, and without letting a
 language model quietly delete the one headline that mattered.
