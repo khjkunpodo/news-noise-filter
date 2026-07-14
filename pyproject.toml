@@ -20,3 +20,9 @@ test = ["pytest"]
 
 [tool.setuptools]
 packages = ["noise_filter"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# 저장소 루트를 import 경로에 넣는다. 이게 없으면 `python -m pytest`(cwd 를 sys.path 에
+# 넣어줌)로는 통과하지만, 맨 `pytest`(CI 가 쓰는 방식)에서는 noise_filter 를 못 찾는다.
+pythonpath = ["."]
