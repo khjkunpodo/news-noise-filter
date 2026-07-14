@@ -1,0 +1,51 @@
+# Example config for a reader who tracks a handful of companies in one industry.
+# Everything below is just data — the same engine works for any beat. Swap the
+# patterns for your own and the pipeline follows.
+#
+# Patterns are regular expressions, matched case-insensitively against the
+# headline. The demo uses an English tech-industry example; a real deployment
+# would use whatever language and beat you care about.
+
+# Earnings/results news is only kept when it's about one of these entities.
+priority_entities:
+  - Acme
+  - Globex
+  - Initech
+  - Umbrella
+
+# Always-drop categories: promotional and human-interest filler that never
+# carries decision-relevant information.
+noise_patterns:
+  - donat(e|ion)|charity|volunteer|fundrais
+  - award|prize|honou?r|ceremony|commendation
+  - \bMOU\b|memorandum of understanding|signs partnership|partnership signed
+  - sweepstakes|giveaway|coupon|promo code
+  - photo|pictured|in pictures|caption
+
+# Stock/market chatter — noise for someone who follows the business, not the
+# ticker.
+market_patterns:
+  - target price|price target|(up|down)grade[ds]?
+  - shares (rose|fell|jump|slump|surge|plunge)
+  - buy rating|sell rating|overweight|underweight
+  - \d+% (gain|loss) intraday|hits (record|all-time) (high|low)
+
+# Earnings vocabulary. Kept only for priority_entities (see rules.py).
+earnings_patterns:
+  - earnings|revenue|net (income|profit|loss)|operating (income|profit)
+  - quarterly results|posts (profit|loss)|beats|misses estimates
+
+# Analyst-estimate vocabulary. An earnings headline that's really an analyst
+# forecast is dropped even for a priority entity.
+analyst_patterns:
+  - analyst|consensus|estimate[ds]?|forecast|projected|sees .* (profit|revenue)
+  - coverage initiated|reiterates
+
+# Dedup aggressiveness. Higher = only very-similar headlines are merged.
+sim_threshold: 0.55
+
+# Entity aliases normalized before dedup so variants count as the same word.
+aliases:
+  "Acme Corp": "Acme"
+  "Acme Corporation": "Acme"
+  "Globex Inc": "Globex"
